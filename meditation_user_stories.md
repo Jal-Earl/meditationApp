@@ -31,7 +31,6 @@ As a person new to meditation I want to be able to find easy beginner techniques
     Acceptance criteria: A logo in the top left corner and a settings icon in the top right
 
 *User Story - Detailed page*
-
 - As a User, I want to see an about section for the excercise/technique
     Acceptance criteria: An about section explaining its focus and benefits
 - As a User, I want to see an instructions section for the excerise/technique
@@ -46,7 +45,7 @@ As a person new to meditation I want to be able to find easy beginner techniques
 - As a USer, I want a favorites screen so that I can easily find my favorite excercises/techniques
     Acceptance criteria: A seperate screen with all favorites
 
-*User Story - Favorites*
+*User Story - Daily Notification*
 - As a User, I want to select dates for reminders, with a easy to navigate calendar.
     Accceptance criteria: An easy to navigate calender and able to click on a date to schedule reminders.
 - As a User, I want to see a list of set reminders so that i can easily view them.
@@ -59,3 +58,11 @@ As a person new to meditation I want to be able to find easy beginner techniques
 *User Story - Change Setting*
 - As a User, I want to be able to change the theme (light mode and dark mode)
     Acceptance criteria: In the setting page have a button to toggle between light and dark mode. 
+
+*User Story - Persistent data*
+- As a USer, I want my data such as login credentials and theme preference to be stored locally
+      Acceptance criteria: User details filled so that user do not have to fill it in everytime.
+
+*User Story - weather*
+- As a User, I want to check the weather, so that I can decide if I want to practice meditation outdoors or indoors
+      Acceptance criteria: A small weather outlook on the homepage integrated via external API.
