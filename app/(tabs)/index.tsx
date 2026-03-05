@@ -1,98 +1,192 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Redirect, router } from 'expo-router';
+import { Share, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useAppContext } from '@/context/app-context';
+import { meditationTechniques } from '@/data/meditations';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const { currentUser, favorites, toggleFavorite, theme } = useAppContext();
+  const isDark = theme === 'dark';
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  if (!currentUser) {
+    return <Redirect href="/login" />;
+  }
+
+  const featured = meditationTechniques[0];
+
+  const onShare = async (title: string) => {
+    await Share.share({
+      message: `Try this meditation technique: ${title}`,
+    });
+  };
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#0F172A' : '#F8FAFC' }]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.topRow}>
+          <Text style={[styles.logo, { color: isDark ? '#E2E8F0' : '#0F172A' }]}>🧘ZenStart</Text>
+          <Pressable onPress={() => router.push('/(tabs)/settings')}>
+            <Ionicons name="settings-outline" size={24} color={isDark ? '#E2E8F0' : '#0F172A'} />
+          </Pressable>
+        </View>
+
+        <Text style={[styles.greeting, { color: isDark ? '#E2E8F0' : '#0F172A' }]}>Hello, {currentUser.username}</Text>
+        <Text style={[styles.subtitle, { color: isDark ? '#94A3B8' : '#475569' }]}>Started your meditation journey here</Text>
+
+        <View style={[styles.featured, { backgroundColor: isDark ? '#1E293B' : '#FFFFFF' }]}>
+          <Text style={[styles.sectionTitle, { color: isDark ? '#E2E8F0' : '#0F172A' }]}>Daily Featured Exercise</Text>
+          <Text style={styles.imagePlaceholder}>[image]</Text>
+          <Text style={[styles.cardTitle, { color: isDark ? '#E2E8F0' : '#0F172A' }]}>{featured.title}</Text>
+          <Text style={[styles.cardDescription, { color: isDark ? '#94A3B8' : '#475569' }]}>{featured.description}</Text>
+          <Text style={[styles.duration, { color: isDark ? '#CBD5E1' : '#334155' }]}>Duration: {featured.duration}</Text>
+          <View style={styles.cardActions}>
+            <Pressable style={styles.actionButton} onPress={() => router.push({ pathname: '/meditation/[id]', params: { id: featured.id } })}>
+              <Text style={styles.actionText}>Open</Text>
+            </Pressable>
+            <Pressable style={styles.actionButton} onPress={() => onShare(featured.title)}>
+              <Text style={styles.actionText}>Share</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={styles.sectionRow}>
+          <Text style={[styles.sectionTitle, { color: isDark ? '#E2E8F0' : '#0F172A' }]}>Beginner Techniques</Text>
+          <Pressable style={styles.reminderButton} onPress={() => router.push('/(tabs)/reminders')}>
+            <Text style={styles.reminderButtonText}>Reminders</Text>
+          </Pressable>
+        </View>
+
+        {meditationTechniques.map((item) => {
+          const isFavorite = favorites.includes(item.id);
+          return (
+            <View key={item.id} style={[styles.card, { backgroundColor: isDark ? '#1E293B' : '#FFFFFF' }]}>
+              <Text style={styles.imagePlaceholder}>[image]</Text>
+              <Text style={[styles.cardTitle, { color: isDark ? '#E2E8F0' : '#0F172A' }]}>{item.title}</Text>
+              <Text style={[styles.cardDescription, { color: isDark ? '#94A3B8' : '#475569' }]}>{item.description}</Text>
+              <Text style={[styles.duration, { color: isDark ? '#CBD5E1' : '#334155' }]}>Duration: {item.duration}</Text>
+
+              <View style={styles.cardActions}>
+                <Pressable style={styles.actionButton} onPress={() => router.push({ pathname: '/meditation/[id]', params: { id: item.id } })}>
+                  <Text style={styles.actionText}>View</Text>
+                </Pressable>
+                <Pressable style={styles.actionButton} onPress={() => onShare(item.title)}>
+                  <Text style={styles.actionText}>Share</Text>
+                </Pressable>
+                <Pressable style={styles.favoriteAction} onPress={() => toggleFavorite(item.id)}>
+                  <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={18} color={isFavorite ? '#DC2626' : '#475569'} />
+                  <Text style={[styles.favoriteText, { color: isDark ? '#CBD5E1' : '#334155' }]}>Add to favorites</Text>
+                </Pressable>
+              </View>
+            </View>
+          );
+        })}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+  },
+  content: {
+    padding: 16,
+    gap: 14,
+    paddingBottom: 32,
+  },
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  logo: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  greeting: {
+    fontSize: 26,
+    fontWeight: '700',
+  },
+  subtitle: {
+    fontSize: 14,
+    marginTop: -6,
+  },
+  featured: {
+    borderRadius: 14,
+    padding: 14,
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  sectionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  reminderButton: {
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  reminderButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  card: {
+    borderRadius: 14,
+    padding: 14,
+    gap: 8,
+  },
+  imagePlaceholder: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#94A3B8',
+    borderRadius: 10,
+    textAlign: 'center',
+    paddingVertical: 18,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  cardDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  duration: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  cardActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'wrap',
+  },
+  actionButton: {
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  actionText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  favoriteAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginLeft: 4,
+  },
+  favoriteText: {
+    fontSize: 13,
   },
 });
